@@ -48,10 +48,13 @@ fetch(sheetURL)
 
     document.getElementById("searchInput").addEventListener("input", function () {
       const value = this.value.toLowerCase();
-      const match = rows.find(r => r.name.includes(value));
-      document.getElementById("result").innerHTML = match
-        ? `✨ You are seated at <strong>${match.table}</strong>`
-        : "";
+    const match = rows.find(r => r.name.startsWith(value));
+
+document.getElementById("result").innerHTML = value.length === 0
+  ? ""
+  : match
+    ? `✨ You are seated at <strong>Table ${match.table}</strong>`
+    : "No match yet – please check spelling";
     });
   });
 </script>

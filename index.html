@@ -83,12 +83,14 @@
         }
       });
     })
-    .catch(() => {
-      document.getElementById("result").innerHTML =
-        "Unable to load seating list. Please see staff for help.";
-    });
+    .catch(error => {
+  document.getElementById("result").innerHTML =
+    "Error loading guest list: " + error;
+});
+
 </script>
 
 </body>
 </html>
+
 

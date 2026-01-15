@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find Your Seat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+      text-align: center;
+      padding: 40px;
+    }
+    input {
+      padding: 14px;
+      width: 80%;
+      max-width: 400px;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .result {
+      font-size: 22px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Find Your Seat</h1>
+  <p>Type your full name below</p>
+
+  <input type="text" id="searchInput" placeholder="e.g. Sarah Smith">
+
+  <div class="result" id="result"></div>
+
+<script>
+const sheetID = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTy1W31HURy8P6NLPHpghHsrkFUZ4p5zLOI_7xwd2pfx19TzVwtWV0DqnG8eMvKa5dSyM428N0d06fg/pubhtml?gid=176447751&single=true";
+const sheetURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+
+fetch(sheetURL)
+  .then(res => res.text())
+  .then(data => {
+    const json = JSON.parse(data.substring(47).slice(0, -2));
+    const rows = json.table.rows.map(r => ({
+      name: r.c[0]?.v.toLowerCase(),
+      table: r.c[1]?.v
+    }));
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const value = this.value.toLowerCase();
+      const match = rows.find(r => r.name.includes(value));
+      document.getElementById("result").innerHTML = match
+        ? `✨ You are seated at <strong>${match.table}</strong>`
+        : "";
+    });
+  });
+</script>
+
+</body>
+</html>

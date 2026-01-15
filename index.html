@@ -1,5 +1,4 @@
-<!DOCTYPE html> 
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -37,31 +36,34 @@
 
 <body>
 
-  <h1>Find Your Seat</h1>
-  <p>Type your name below</p>
+<h1>Find Your Seat</h1>
+<p>Type your name below</p>
 
-  <input
-    type="text"
-    id="searchInput"
-    placeholder="e.g. Maria"
-    autocomplete="off"
-  >
+<input
+  type="text"
+  id="searchInput"
+  placeholder="e.g. Maria"
+  autocomplete="off"
+/>
 
-  <div class="result" id="result"></div>
+<div class="result" id="result"></div>
 
 <script>
   const sheetID = "1tnahNX2ORG61zDElp32dwQsnI6QouwKTh5yDAy9NuqA";
-  const sheetURL = `https://docs.google.com/spreadsheets/d/1tnahNX2ORG61zDElp32dwQsnI6QouwKTh5yDAy9NuqA/edit?gid=0#gid=0`;
+  const sheetURL =
+    `https://docs.google.com/spreadsheets/d/${sheetID}/pub?output=csv`;
 
   fetch(sheetURL)
     .then(response => response.text())
-    .then(text => {
-      const json = JSON.parse(text.substring(47).slice(0, -2));
-
-      const rows = json.table.rows.map(row => ({
-        name: row.c[0]?.v?.toLowerCase().trim(),
-        table: row.c[1]?.v
-      }));
+    .then(csv => {
+      const lines = csv.split("\n").slice(1);
+      const rows = lines.map(line => {
+        const [name, table] = line.split(",");
+        return {
+          name: name?.toLowerCase().trim(),
+          table: table?.trim()
+        };
+      });
 
       const input = document.getElementById("searchInput");
       const result = document.getElementById("result");
@@ -69,28 +71,24 @@
       input.addEventListener("input", () => {
         const value = input.value.toLowerCase().trim();
 
-        if (value.length === 0) {
+        if (!value) {
           result.innerHTML = "";
           return;
         }
 
         const match = rows.find(r => r.name.startsWith(value));
 
-        if (match) {
-          result.innerHTML = `✨ You are seated at <strong>Table ${match.table}</strong>`;
-        } else {
-          result.innerHTML = "No match yet — please check spelling";
-        }
+        result.innerHTML = match
+          ? `✨ You are seated at <strong>Table ${match.table}</strong>`
+          : "No match yet — please check spelling";
       });
     })
-    .catch(error => {
-  document.getElementById("result").innerHTML =
-    "Error loading guest list: " + error;
-});
-
+    .catch(err => {
+      document.getElementById("result").innerHTML =
+        "Unable to load seating list. Please see staff for help.";
+      console.error(err);
+    });
 </script>
 
 </body>
 </html>
-
-

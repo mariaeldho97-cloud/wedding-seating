@@ -4,59 +4,88 @@
   <meta charset="UTF-8">
   <title>Find Your Seat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #fafafa;
       text-align: center;
-      padding: 40px;
+      padding: 40px 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    p {
+      color: #555;
     }
     input {
       padding: 14px;
-      width: 80%;
+      width: 100%;
       max-width: 400px;
       font-size: 18px;
-      margin-bottom: 20px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     .result {
       font-size: 22px;
-      margin-top: 20px;
+      margin-top: 25px;
     }
   </style>
 </head>
+
 <body>
 
   <h1>Find Your Seat</h1>
-  <p>Type your full name below</p>
+  <p>Type your name below</p>
 
-  <input type="text" id="searchInput" placeholder="e.g. Sarah Smith">
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="e.g. Maria"
+    autocomplete="off"
+  >
 
   <div class="result" id="result"></div>
 
 <script>
-const sheetID = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTy1W31HURy8P6NLPHpghHsrkFUZ4p5zLOI_7xwd2pfx19TzVwtWV0DqnG8eMvKa5dSyM428N0d06fg/pubhtml?gid=176447751&single=true";
-const sheetURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+  const sheetID = "Sheet8";
+  const sheetURL = `https://docs.google.com/spreadsheets/d/1FI53w4nKMmFmQAedHYCLoC5968I9pmoRybW5lwcsxdw/edit?usp=sharing`;
 
-fetch(sheetURL)
-  .then(res => res.text())
-  .then(data => {
-    const json = JSON.parse(data.substring(47).slice(0, -2));
-    const rows = json.table.rows.map(r => ({
-      name: r.c[0]?.v.toLowerCase(),
-      table: r.c[1]?.v
-    }));
+  fetch(sheetURL)
+    .then(response => response.text())
+    .then(text => {
+      const json = JSON.parse(text.substring(47).slice(0, -2));
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-      const value = this.value.toLowerCase();
-    const match = rows.find(r => r.name.startsWith(value));
+      const rows = json.table.rows.map(row => ({
+        name: row.c[0]?.v?.toLowerCase().trim(),
+        table: row.c[1]?.v
+      }));
 
-document.getElementById("result").innerHTML = value.length === 0
-  ? ""
-  : match
-    ? `✨ You are seated at <strong>Table ${match.table}</strong>`
-    : "No match yet – please check spelling";
+      const input = document.getElementById("searchInput");
+      const result = document.getElementById("result");
+
+      input.addEventListener("input", () => {
+        const value = input.value.toLowerCase().trim();
+
+        if (value.length === 0) {
+          result.innerHTML = "";
+          return;
+        }
+
+        const match = rows.find(r => r.name.startsWith(value));
+
+        if (match) {
+          result.innerHTML = `✨ You are seated at <strong>Table ${match.table}</strong>`;
+        } else {
+          result.innerHTML = "No match yet — please check spelling";
+        }
+      });
+    })
+    .catch(() => {
+      document.getElementById("result").innerHTML =
+        "Unable to load seating list. Please see staff for help.";
     });
-  });
 </script>
 
 </body>
